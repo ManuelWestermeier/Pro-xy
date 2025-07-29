@@ -1,43 +1,51 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const app = express();
+const http = require('http');
+const { request: httpRequest } = require('http');
+const { request: httpsRequest } = require('https');
 
-app.use(express.text({ type: "*/*" })); // Handle all body types as raw text
-
-app.all('/proxy', async (req, res) => {
+const proxy = http.createServer((clientReq, clientRes) => {
   try {
-    const targetUrl = req.query.url;
-    if (!targetUrl) return res.status(400).send("Missing 'url' parameter");
+    const hostHeader = clientReq.headers.host || '';
+    const atIndex = hostHeader.indexOf('@');
 
-    const parsedUrl = new URL(targetUrl);
-    const baseDomain = parsedUrl.username || 'anonymous';
-
-    // Extract headers, excluding host-specific ones
-    const proxyHeaders = { ...req.headers };
-    delete proxyHeaders.host;
-    delete proxyHeaders['content-length']; // Let fetch compute
-
-    const options = {
-      method: req.method,
-      headers: proxyHeaders,
-      body: ['GET', 'HEAD'].includes(req.method) ? undefined : req.body
-    };
-
-    const proxyRes = await fetch(targetUrl, options);
-    const proxyBody = await proxyRes.text();
-
-    // Forward status and headers
-    res.status(proxyRes.status);
-    for (const [key, value] of proxyRes.headers.entries()) {
-      res.setHeader(key, value);
+    if (atIndex === -1) {
+      clientRes.writeHead(400);
+      clientRes.end('Invalid Host header. Must be in the form: destdomain@proxyserver.com');
+      return;
     }
 
-    res.send(proxyBody);
+    const destDomain = hostHeader.substring(0, atIndex);
+    const isTLS = clientReq.headers['x-forwarded-proto'] === 'https';
+    const targetProtocol = isTLS ? httpsRequest : httpRequest;
+
+    const forwardOptions = {
+      hostname: destDomain,
+      port: 80,
+      method: clientReq.method,
+      path: clientReq.url,
+      headers: {
+        ...clientReq.headers,
+        host: destDomain // Fix host header
+      }
+    };
+
+    // Send request to destination
+    const proxyReq = targetProtocol(forwardOptions, (proxyRes) => {
+      clientRes.writeHead(proxyRes.statusCode, proxyRes.headers);
+      proxyRes.pipe(clientRes);
+    });
+
+    proxyReq.on('error', (err) => {
+      clientRes.writeHead(502);
+      clientRes.end(`Proxy Error: ${err.message}`);
+    });
+
+    clientReq.pipe(proxyReq);
   } catch (err) {
-    res.status(500).send(`Proxy error: ${err.message}`);
+    clientRes.writeHead(500);
+    clientRes.end(`Internal Error: ${err.message}`);
   }
 });
 
-app.listen(3000, () => {
-  console.log('Proxy running at http://localhost:3000/proxy?url=https://user@domain.com/path');
+proxy.listen(3000, () => {
+  console.log('Proxy server running on port 3000');
 });
