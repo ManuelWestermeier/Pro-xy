@@ -12,8 +12,8 @@ app.use('/', createProxyMiddleware({
 
   onProxyReq: (proxyReq, req, res) => {
     // Original header entfernen/verfälschen
-    proxyReq.setHeader('Referer', 'https://www.google.com/');
-    proxyReq.setHeader('Origin', 'https://www.google.com');
+    proxyReq.setHeader('Referer', 'https://www.proxysite.com/');
+    proxyReq.setHeader('Origin', 'https://www.proxysite.com');
     proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
     proxyReq.removeHeader('X-Forwarded-For');
     proxyReq.removeHeader('Via');
@@ -21,7 +21,7 @@ app.use('/', createProxyMiddleware({
 
   onProxyRes: (proxyRes, req, res) => {
     // Sicherheit: CORS-Header setzen, um Zugriff zu erlauben
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // res.setHeader('Access-Control-Allow-Origin', '*');
   },
 
   pathRewrite: {
