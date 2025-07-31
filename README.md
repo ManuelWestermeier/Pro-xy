@@ -5,12 +5,13 @@ Ein einfacher Node.js-Proxy, der Web-Traffic über eine Zielseite wie `https://s
 ## ⚙️ Installation
 
 ```bash
-git clone <repo-url>
-cd http-header-masking-proxy
+git clone https://github.com/ManuelWestermeier/Pro-xy.git
+cd Pro-xy
 npm install
 ```
 
-## 
+##  Run
 
-
+```bash
 node .
+```
