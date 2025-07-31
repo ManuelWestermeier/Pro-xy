@@ -1,22 +1,11 @@
 {
-  "name": "http-header-masking-proxy",
+  "name": "pure-node-proxy",
   "version": "1.0.0",
-  "description": "Ein einfacher Node.js HTTP-Proxy, der Header modifiziert, um die wahre Traffic-Quelle zu verschleiern.",
+  "description": "Ein reiner Node.js-HTTP-Proxy ohne externe Libraries",
   "main": "proxy.js",
   "scripts": {
     "start": "node proxy.js"
   },
-  "keywords": [
-    "proxy",
-    "http-proxy",
-    "nodejs",
-    "header-masking",
-    "anonymizer"
-  ],
-  "author": "Manuel Westermeier",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.19.2",
-    "http-proxy-middleware": "^2.0.6"
-  }
+  "author": "Mein Herr und Meister",
+  "license": "MIT"
 }
