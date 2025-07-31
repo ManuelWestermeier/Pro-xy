@@ -3,7 +3,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-const TARGET_URL = 'https://share.google/NWFlo9IPRIqpaw2PA';
+const TARGET_URL = 'https://www.proxysite.com/de/';
 
 app.use('/', createProxyMiddleware({
   target: TARGET_URL,
