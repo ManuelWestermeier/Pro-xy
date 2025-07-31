@@ -3,7 +3,8 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-const TARGET_URL = 'https://www.proxysite.com/';
+// const TARGET_URL = 'https://www.proxysite.com/';
+const TARGET_URL = 'http://84.139.223.15:7777';
 
 console.log(`proxy stated on: `+TARGET_URL);
 
