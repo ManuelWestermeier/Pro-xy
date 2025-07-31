@@ -1,51 +1,35 @@
-const http = require('http');
-const { request: httpRequest } = require('http');
-const { request: httpsRequest } = require('https');
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
-const proxy = http.createServer((clientReq, clientRes) => {
-  try {
-    const hostHeader = clientReq.headers.host || '';
-    const atIndex = hostHeader.indexOf('@');
+const app = express();
 
-    if (atIndex === -1) {
-      clientRes.writeHead(400);
-      clientRes.end('Invalid Host header. Must be in the form: destdomain@proxyserver.com');
-      return;
-    }
+const TARGET_URL = 'https://share.google/NWFlo9IPRIqpaw2PA';
 
-    const destDomain = hostHeader.substring(0, atIndex);
-    const isTLS = clientReq.headers['x-forwarded-proto'] === 'https';
-    const targetProtocol = isTLS ? httpsRequest : httpRequest;
+app.use('/', createProxyMiddleware({
+  target: TARGET_URL,
+  changeOrigin: true,
+  secure: false,
 
-    const forwardOptions = {
-      hostname: destDomain,
-      port: 80,
-      method: clientReq.method,
-      path: clientReq.url,
-      headers: {
-        ...clientReq.headers,
-        host: destDomain // Fix host header
-      }
-    };
+  onProxyReq: (proxyReq, req, res) => {
+    // Original header entfernen/verfälschen
+    proxyReq.setHeader('Referer', 'https://www.google.com/');
+    proxyReq.setHeader('Origin', 'https://www.google.com');
+    proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+    proxyReq.removeHeader('X-Forwarded-For');
+    proxyReq.removeHeader('Via');
+  },
 
-    // Send request to destination
-    const proxyReq = targetProtocol(forwardOptions, (proxyRes) => {
-      clientRes.writeHead(proxyRes.statusCode, proxyRes.headers);
-      proxyRes.pipe(clientRes);
-    });
+  onProxyRes: (proxyRes, req, res) => {
+    // Sicherheit: CORS-Header setzen, um Zugriff zu erlauben
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  },
 
-    proxyReq.on('error', (err) => {
-      clientRes.writeHead(502);
-      clientRes.end(`Proxy Error: ${err.message}`);
-    });
-
-    clientReq.pipe(proxyReq);
-  } catch (err) {
-    clientRes.writeHead(500);
-    clientRes.end(`Internal Error: ${err.message}`);
+  pathRewrite: {
+    '^/': '/', // optional – falls du z. B. nur bestimmte Pfade weiterleiten willst
   }
-});
+}));
 
-proxy.listen(3000, () => {
-  console.log('Proxy server running on port 3000');
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Proxy läuft auf http://localhost:${PORT}`);
 });
