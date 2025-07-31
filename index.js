@@ -2,7 +2,7 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 
-const test = true;
+const test = false;
 const TARGET_URL = test ? 'http://84.139.223.15:7777' : 'https://www.proxysite.com';
 
 const PORT = 3000;
