@@ -3,7 +3,7 @@ const https = require('https');
 const { URL } = require('url');
 
 const test = false;
-const TARGET_URL = test ? 'http://84.139.223.15:7777' : 'https://manuel--westermeier-duckdns-org.translate.goog/?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp';
+const TARGET_URL = test ? 'http://84.139.223.15:7777' : 'https://hide.me';
 
 const PORT = 3000;
 
