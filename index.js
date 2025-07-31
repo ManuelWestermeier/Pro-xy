@@ -3,17 +3,19 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-const TARGET_URL = 'https://www.proxysite.com/de/';
+const TARGET_URL = 'https://www.proxysite.com/';
+
+console.log(`proxy stated on: `+TARGET_URL);
 
 app.use('/', createProxyMiddleware({
   target: TARGET_URL,
   changeOrigin: true,
-  secure: false,
+  secure: true,
 
   onProxyReq: (proxyReq, req, res) => {
     // Original header entfernen/verfälschen
-    proxyReq.setHeader('Referer', 'https://www.proxysite.com/');
-    proxyReq.setHeader('Origin', 'https://www.proxysite.com');
+    proxyReq.setHeader('Referer', TARGET_URL);
+    proxyReq.setHeader('Origin', TARGET_URL);
     proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
     proxyReq.removeHeader('X-Forwarded-For');
     proxyReq.removeHeader('Via');
